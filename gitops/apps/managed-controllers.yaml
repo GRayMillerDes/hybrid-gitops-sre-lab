@@ -1,0 +1,53 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudbees-mc-aws
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/GRayMillerDes/hybrid-gitops-sre-lab.git
+    targetRevision: main
+    path: gitops/charts/cloudbees-mc-template
+    helm:
+      values: |
+        controller:
+          name: mc-aws-apps
+          environment: aws-sim
+          replicas: 1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cicd-controllers
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudbees-mc-tke
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/GRayMillerDes/hybrid-gitops-sre-lab.git
+    targetRevision: main
+    path: gitops/charts/cloudbees-mc-template
+    helm:
+      values: |
+        controller:
+          name: mc-tke-platform
+          environment: tke-sim
+          replicas: 1
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cicd-controllers
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

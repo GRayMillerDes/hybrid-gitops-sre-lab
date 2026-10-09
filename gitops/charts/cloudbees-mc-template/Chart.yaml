@@ -1,0 +1,9 @@
+apiVersion: v2
+name: cloudbees-mc-template
+description: Production-grade Helm chart for CloudBees Managed Controllers featuring Configuration-as-Code (CasC) and hardened zero-trust security contexts.
+type: application
+version: 1.0.0
+appVersion: "2.440.3"
+maintainers:
+  - name: Gray Miller
+    email: retropoken@gmail.com

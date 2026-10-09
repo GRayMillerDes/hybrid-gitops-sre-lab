@@ -1,0 +1,46 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-slo-burn-rate-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    app.kubernetes.io/part-of: sre-observability
+spec:
+  groups:
+    - name: slo-burn-rate-detection
+      rules:
+        # Multi-Window Multi-Burn-Rate Alerts (Google SRE Handbook Pattern)
+        # 14.4x burn rate over 1 hour consumes 2% of a 30-day error budget
+        - alert: HighErrorBudgetBurnRate1h
+          expr: |
+            (
+              sum(rate(http_requests_total{status=~"5.."}[1h]))
+              /
+              sum(rate(http_requests_total[1h]))
+            ) > (1 - 0.999) * 14.4
+          for: 2m
+          labels:
+            severity: critical
+            tier: platform-sre
+          annotations:
+            summary: "Critical SLO Error Budget Burn Rate (1h window)"
+            description: "High error budget consumption detected: 14.4x burn rate over 1h. At this rate, the monthly error budget will be depleted within 50 hours."
+            runbook_url: "https://github.com/GRayMillerDes/hybrid-gitops-sre-lab/blob/main/docs/runbooks/slo-burn-rate.md"
+
+        # 6x burn rate over 6 hours consumes 5% of a 30-day error budget
+        - alert: ElevatedErrorBudgetBurnRate6h
+          expr: |
+            (
+              sum(rate(http_requests_total{status=~"5.."}[6h]))
+              /
+              sum(rate(http_requests_total[6h]))
+            ) > (1 - 0.999) * 6
+          for: 15m
+          labels:
+            severity: warning
+            tier: platform-sre
+          annotations:
+            summary: "Elevated SLO Error Budget Burn Rate (6h window)"
+            description: "Elevated error budget consumption: 6x burn rate over 6h. Monthly error budget will be depleted in 5 days."
+            runbook_url: "https://github.com/GRayMillerDes/hybrid-gitops-sre-lab/blob/main/docs/runbooks/slo-burn-rate.md"

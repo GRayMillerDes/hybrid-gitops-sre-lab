@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.controller.name }}-casc-bundle
+  labels:
+    app.kubernetes.io/name: {{ .Values.controller.name }}
+    app.kubernetes.io/part-of: enterprise-ci-cd
+data:
+  jenkins.yaml: |
+    jenkins:
+      systemMessage: "{{ .Values.casc.systemMessage }}"
+      numExecutors: {{ .Values.casc.executors }}
+      mode: EXCLUSIVE
+      scmCheckoutRetryCount: 3
+      disableRememberMe: true
+    unclassified:
+      location:
+        adminAddress: "sre-ops@enterprise.local"
+        url: "http://{{ .Values.controller.name }}.cicd-controllers.svc.cluster.local:8080/"

@@ -1,0 +1,25 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+!terraform.tfvars.example
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# Kubernetes & Diagnostics
+kubeconfig
+/tmp/sre-diagnostics-*
+
+# OS & Editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo

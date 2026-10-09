@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="blueCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e3a8a" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <linearGradient id="purpleCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#581c87" />
+      <stop offset="100%" stop-color="#9333ea" />
+    </linearGradient>
+    <linearGradient id="emeraldCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="amberCard" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="800" fill="url(#bg)" />
+
+  <!-- Title Section -->
+  <text x="600" y="50" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="bold" fill="#f8fafc" text-anchor="middle">
+    Enterprise Hybrid GitOps &amp; Zero-Trust SRE Sandbox Architecture
+  </text>
+  <text x="600" y="80" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#94a3b8" text-anchor="middle">
+    Declarative IaC • Secretless ESO Delivery • Multi-Tenant CasC • Non-Interactive SRE Diagnostics
+  </text>
+
+  <!-- Left Column: Workstation & Control Plane -->
+  <!-- Layer 1: Workstation -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="120" width="320" height="180" rx="12" fill="#1e293b" stroke="#334155" stroke-width="2" />
+    <rect x="50" y="120" width="320" height="36" rx="12" fill="#334155" />
+    <text x="210" y="144" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0" text-anchor="middle">Workstation &amp; CI Runner</text>
+    
+    <rect x="70" y="170" width="280" height="50" rx="8" fill="url(#purpleCard)" />
+    <text x="85" y="192" font-family="sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Terraform 1.6+ (Local Kind)</text>
+    <text x="85" y="210" font-family="sans-serif" font-size="11" fill="#e9d5ff">Zero-Secret State Policy &amp; Modules</text>
+
+    <rect x="70" y="230" width="280" height="50" rx="8" fill="url(#amberCard)" />
+    <text x="85" y="252" font-family="sans-serif" font-size="13" font-weight="bold" fill="#ffffff">non-interactive-diag.sh</text>
+    <text x="85" y="270" font-family="sans-serif" font-size="11" fill="#fef3c7">Automated Exit Code &amp; Stderr Triage</text>
+  </g>
+
+  <!-- Layer 2: Kind Control Plane -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="340" width="320" height="400" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="2" />
+    <rect x="50" y="340" width="320" height="36" rx="12" fill="#0284c7" />
+    <text x="210" y="364" font-family="sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Kind Control Plane (K8s 1.28+)</text>
+
+    <rect x="70" y="390" width="280" height="70" rx="8" fill="#0f172a" stroke="#475569" stroke-width="1"/>
+    <text x="85" y="415" font-family="sans-serif" font-size="13" font-weight="bold" fill="#38bdf8">K8s API Server</text>
+    <text x="85" y="435" font-family="sans-serif" font-size="11" fill="#94a3b8">NodePort 30080 (Argo CD)</text>
+    <text x="85" y="450" font-family="sans-serif" font-size="11" fill="#94a3b8">NodePort 30000 (Grafana)</text>
+
+    <rect x="70" y="480" width="280" height="70" rx="8" fill="url(#amberCard)" />
+    <text x="85" y="505" font-family="sans-serif" font-size="13" font-weight="bold" fill="#ffffff">Argo CD Control Plane</text>
+    <text x="85" y="525" font-family="sans-serif" font-size="11" fill="#fef3c7">Declarative App-of-Apps Sync</text>
+    <text x="85" y="540" font-family="sans-serif" font-size="11" fill="#fef3c7">Automated Self-Healing Drift Detection</text>
+
+    <rect x="70" y="570" width="280" height="70" rx="8" fill="url(#emeraldCard)" />
+    <text x="85" y="595" font-family="sans-serif" font-size="13" font-weight="bold" fill="#ffffff">External Secrets Operator (ESO)</text>
+    <text x="85" y="615" font-family="sans-serif" font-size="11" fill="#d1fae5">Simulated Cloud Vault Provider</text>
+    <text x="85" y="630" font-family="sans-serif" font-size="11" fill="#d1fae5">In-Memory Secret Delivery</text>
+
+    <rect x="70" y="660" width="280" height="60" rx="8" fill="#334155" />
+    <text x="85" y="685" font-family="sans-serif" font-size="12" font-weight="bold" fill="#f8fafc">ClusterSecretStore CRD</text>
+    <text x="85" y="703" font-family="sans-serif" font-size="11" fill="#cbd5e1">Mock Vault: DB, Tokens, License</text>
+  </g>
+
+  <!-- Right Top: Multi-Cloud Simulation Data Plane -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="120" width="730" height="350" rx="12" fill="#1e293b" stroke="#334155" stroke-width="2" />
+    <rect x="420" y="120" width="730" height="36" rx="12" fill="#334155" />
+    <text x="785" y="144" font-family="sans-serif" font-size="14" font-weight="bold" fill="#e2e8f0" text-anchor="middle">Workload Data Plane (Simulated Multi-Cloud)</text>
+
+    <!-- Worker 1 -->
+    <rect x="440" y="170" width="340" height="280" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1" />
+    <text x="460" y="195" font-family="sans-serif" font-size="13" font-weight="bold" fill="#38bdf8">Worker Node 1: AWS Simulation</text>
+    <text x="460" y="213" font-family="sans-serif" font-size="11" fill="#64748b">label: cloud-zone=multi-cloud-sim-aws</text>
+
+    <rect x="455" y="230" width="310" height="110" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" />
+    <text x="470" y="255" font-family="sans-serif" font-size="12" font-weight="bold" fill="#f1f5f9">Pod: CloudBees MC (AWS Apps)</text>
+    <text x="470" y="275" font-family="sans-serif" font-size="11" fill="#10b981">✓ runAsUser: 1000 (Non-root)</text>
+    <text x="470" y="293" font-family="sans-serif" font-size="11" fill="#10b981">✓ readOnlyRootFilesystem: true</text>
+    <text x="470" y="311" font-family="sans-serif" font-size="11" fill="#10b981">✓ drop capabilities: ["ALL"]</text>
+    <text x="470" y="329" font-family="sans-serif" font-size="11" fill="#38bdf8">⚡ Dynamic CasC ConfigMap Mounted</text>
+
+    <rect x="455" y="355" width="310" height="80" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1" />
+    <text x="470" y="380" font-family="sans-serif" font-size="12" font-weight="bold" fill="#34d399">In-Memory Secret: mock-db-credentials</text>
+    <text x="470" y="400" font-family="sans-serif" font-size="11" fill="#94a3b8">username: cloudbees_admin</text>
+    <text x="470" y="418" font-family="sans-serif" font-size="11" fill="#94a3b8">password: &lt;bound in-memory via ESO&gt;</text>
+
+    <!-- Worker 2 -->
+    <rect x="800" y="170" width="330" height="280" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="1" />
+    <text x="820" y="195" font-family="sans-serif" font-size="13" font-weight="bold" fill="#c084fc">Worker Node 2: TKE Simulation</text>
+    <text x="820" y="213" font-family="sans-serif" font-size="11" fill="#64748b">label: cloud-zone=multi-cloud-sim-tke</text>
+
+    <rect x="815" y="230" width="300" height="110" rx="6" fill="#1e293b" stroke="#475569" stroke-width="1" />
+    <text x="830" y="255" font-family="sans-serif" font-size="12" font-weight="bold" fill="#f1f5f9">Pod: CloudBees MC (TKE Platform)</text>
+    <text x="830" y="275" font-family="sans-serif" font-size="11" fill="#10b981">✓ runAsUser: 1000 (Non-root)</text>
+    <text x="830" y="293" font-family="sans-serif" font-size="11" fill="#10b981">✓ allowPrivilegeEscalation: false</text>
+    <text x="830" y="311" font-family="sans-serif" font-size="11" fill="#10b981">✓ seccompProfile: RuntimeDefault</text>
+    <text x="830" y="329" font-family="sans-serif" font-size="11" fill="#c084fc">⚡ PodDisruptionBudget: minAvailable 1</text>
+
+    <rect x="815" y="355" width="300" height="80" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1" />
+    <text x="830" y="380" font-family="sans-serif" font-size="12" font-weight="bold" fill="#34d399">In-Memory Secret: mock-db-credentials</text>
+    <text x="830" y="400" font-family="sans-serif" font-size="11" fill="#94a3b8">username: cloudbees_admin</text>
+    <text x="830" y="418" font-family="sans-serif" font-size="11" fill="#94a3b8">password: &lt;bound in-memory via ESO&gt;</text>
+  </g>
+
+  <!-- Right Bottom: Observability & SRE Pipelines -->
+  <g filter="url(#shadow)">
+    <rect x="420" y="490" width="730" height="250" rx="12" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+    <rect x="420" y="490" width="730" height="36" rx="12" fill="#065f46" />
+    <text x="785" y="514" font-family="sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">SRE Observability &amp; Telemetry Pipeline</text>
+
+    <!-- Prometheus Stack -->
+    <rect x="440" y="540" width="340" height="180" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+    <text x="460" y="565" font-family="sans-serif" font-size="13" font-weight="bold" fill="#34d399">Prometheus &amp; Alertmanager</text>
+    <text x="460" y="590" font-family="sans-serif" font-size="11" fill="#cbd5e1">🚨 Multi-Window SLO Burn Rate Alerting</text>
+    <text x="475" y="610" font-family="sans-serif" font-size="10" fill="#94a3b8">• 14.4x 1h Window Burn Rate (Critical)</text>
+    <text x="475" y="628" font-family="sans-serif" font-size="10" fill="#94a3b8">• 6x 6h Window Burn Rate (Warning)</text>
+    <text x="460" y="655" font-family="sans-serif" font-size="11" fill="#cbd5e1">💥 Automated CrashLoopBackOff Detection</text>
+    <text x="475" y="675" font-family="sans-serif" font-size="10" fill="#94a3b8">• Triggers non-interactive triage probe</text>
+
+    <!-- Grafana Golden Signals -->
+    <rect x="800" y="540" width="330" height="180" rx="8" fill="#0f172a" stroke="#334155" stroke-width="1" />
+    <text x="820" y="565" font-family="sans-serif" font-size="13" font-weight="bold" fill="#38bdf8">Grafana Golden Signals Dashboard</text>
+    <text x="820" y="595" font-family="sans-serif" font-size="11" fill="#e2e8f0">1. Latency: p99, p95 &amp; Average Response</text>
+    <text x="820" y="620" font-family="sans-serif" font-size="11" fill="#e2e8f0">2. Traffic: Throughput &amp; RPS breakdown</text>
+    <text x="820" y="645" font-family="sans-serif" font-size="11" fill="#e2e8f0">3. Errors: 5xx ratio &amp; Container terminations</text>
+    <text x="820" y="670" font-family="sans-serif" font-size="11" fill="#e2e8f0">4. Saturation: CPU / Memory limit ratios</text>
+    <text x="820" y="700" font-family="sans-serif" font-size="10" fill="#0284c7">Port 30000: Ready-to-demo local UI</text>
+  </g>
+
+  <!-- Connective Arrows & Annotations -->
+  <path d="M 370 210 L 420 210" stroke="#9333ea" stroke-width="2" stroke-dasharray="4,4" fill="none" />
+  <path d="M 370 515 L 440 260" stroke="#f59e0b" stroke-width="2" fill="none" />
+  <path d="M 370 600 L 455 390" stroke="#10b981" stroke-width="2" fill="none" />
+</svg>

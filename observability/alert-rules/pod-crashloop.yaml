@@ -1,0 +1,36 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-pod-crashloop-alerts
+  namespace: monitoring
+  labels:
+    role: alert-rules
+    app.kubernetes.io/part-of: sre-observability
+spec:
+  groups:
+    - name: pod-lifecycle-diagnostics
+      rules:
+        # Alert when a pod enters CrashLoopBackOff
+        - alert: PodCrashLooping
+          expr: |
+            rate(kube_pod_container_status_restarts_total[5m]) * 60 > 0.5
+          for: 3m
+          labels:
+            severity: critical
+            tier: workload-sre
+          annotations:
+            summary: "Container crashlooping in {{ $labels.namespace }}/{{ $labels.pod }}"
+            description: "Pod {{ $labels.pod }} container {{ $labels.container }} is restarting frequently (>0.5 restarts/min). Trigger non-interactive triage probe: './scripts/non-interactive-diag.sh -n {{ $labels.namespace }} -l app={{ $labels.pod }}'."
+            action: "Run non-interactive-diag.sh without requesting interactive shell access"
+
+        # Alert when container terminates with non-zero exit code
+        - alert: ContainerTerminatedNonZero
+          expr: |
+            kube_pod_container_status_last_terminated_reason{reason!="Completed"} > 0
+          for: 1m
+          labels:
+            severity: warning
+            tier: workload-sre
+          annotations:
+            summary: "Container abnormal termination detected"
+            description: "Container {{ $labels.container }} in pod {{ $labels.pod }} terminated abnormally with reason {{ $labels.reason }}."

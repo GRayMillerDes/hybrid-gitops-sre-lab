@@ -1,0 +1,44 @@
+graph TB
+    subgraph "Local Workstation / CI Runner"
+        TF[Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers]
+        DIAG[non-interactive-diag.sh<br/>• Exit Code & Stderr Triage<br/>• Zero-Exec Guardrails]
+    end
+
+    subgraph "Local Kind Control Plane (1.28+)"
+        API[Kubernetes API Server<br/>NodePort 30080 / 30000]
+        ARGO[Argo CD Control Plane<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing]
+        ESO[External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Binding]
+        MOCK_STORE[(Simulated Cloud Vault<br/>AWS SSM / Vault Provider)]
+    end
+
+    subgraph "Workload Data Plane (Simulated Multi-Cloud)"
+        subgraph "Worker 1: AWS Simulation Node"
+            MC_AWS[CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection]
+            SECRET_AWS[(K8s Secret: in-memory<br/>mock-db-credentials)]
+        end
+
+        subgraph "Worker 2: TKE Simulation Node"
+            MC_TKE[CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Capabilities]
+            SECRET_TKE[(K8s Secret: in-memory<br/>mock-db-credentials)]
+        end
+    end
+
+    subgraph "Enterprise SRE Observability"
+        PROM[Prometheus Engine<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection]
+        GRAF[Grafana Golden Signals<br/>• Latency, Traffic, Errors, Saturation]
+    end
+
+    TF -->|Declarative Up| API
+    ARGO -->|Sync App-of-Apps| MC_AWS
+    ARGO -->|Sync App-of-Apps| MC_TKE
+    ESO <-->|In-Memory Fetch| MOCK_STORE
+    ESO -->|Generate Secret| SECRET_AWS
+    ESO -->|Generate Secret| SECRET_TKE
+    SECRET_AWS -.->|Inject Env| MC_AWS
+    SECRET_TKE -.->|Inject Env| MC_TKE
+
+    PROM -.->|Scrape Metrics| MC_AWS
+    PROM -.->|Scrape Metrics| MC_TKE
+    GRAF -->|Visualize| PROM
+    DIAG -.->|Non-Interactive Stderr Extractor| MC_AWS
+    DIAG -.->|Non-Interactive Stderr Extractor| MC_TKE

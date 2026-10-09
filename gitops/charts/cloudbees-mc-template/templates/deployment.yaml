@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.controller.name }}
+  labels:
+    app: {{ .Values.controller.name }}
+    environment: {{ .Values.controller.environment }}
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: {{ .Values.controller.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.controller.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.controller.name }}
+        environment: {{ .Values.controller.environment }}
+    spec:
+      securityContext:
+        runAsNonRoot: {{ .Values.securityContext.pod.runAsNonRoot }}
+        runAsUser: {{ .Values.securityContext.pod.runAsUser }}
+        runAsGroup: {{ .Values.securityContext.pod.runAsGroup }}
+        fsGroup: {{ .Values.securityContext.pod.fsGroup }}
+        seccompProfile:
+          type: {{ .Values.securityContext.pod.seccompProfile.type }}
+      containers:
+        - name: managed-controller
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: {{ .Values.securityContext.container.allowPrivilegeEscalation }}
+            readOnlyRootFilesystem: {{ .Values.securityContext.container.readOnlyRootFilesystem }}
+            capabilities:
+              drop:
+                {{- toYaml .Values.securityContext.container.capabilities.drop | nindent 16 }}
+          env:
+            - name: CASC_JENKINS_CONFIG
+              value: "/var/jenkins_home/casc_configs/jenkins.yaml"
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretRef.name }}
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretRef.name }}
+                  key: password
+          ports:
+            - name: http
+              containerPort: {{ .Values.service.httpPort }}
+              protocol: TCP
+            - name: jnlp
+              containerPort: {{ .Values.service.jnlpPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: casc-volume
+              mountPath: /var/jenkins_home/casc_configs
+              readOnly: true
+            - name: jenkins-home-tmp
+              mountPath: /var/jenkins_home
+            - name: tmp-dir
+              mountPath: /tmp
+      volumes:
+        - name: casc-volume
+          configMap:
+            name: {{ .Values.controller.name }}-casc-bundle
+        - name: jenkins-home-tmp
+          emptyDir: {}
+        - name: tmp-dir
+          emptyDir: {}

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.controller.name }}
+  labels:
+    app: {{ .Values.controller.name }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: http
+      port: {{ .Values.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+    - name: jnlp
+      port: {{ .Values.service.jnlpPort }}
+      targetPort: jnlp
+      protocol: TCP
+  selector:
+    app: {{ .Values.controller.name }}
+---
+{{- if .Values.pdb.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ .Values.controller.name }}-pdb
+spec:
+  minAvailable: {{ .Values.pdb.minAvailable }}
+  selector:
+    matchLabels:
+      app: {{ .Values.controller.name }}
+{{- end }}
