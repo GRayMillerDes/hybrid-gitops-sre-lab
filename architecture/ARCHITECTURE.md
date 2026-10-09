@@ -44,51 +44,60 @@ This document describes the architectural design, security boundaries, and telem
 
 ## 3. High-Resolution Architecture Topology
 
-![Architecture Topology](./topology-diagram.png)
+![Architecture Topology](./topology-diagram.svg)
 
 ```mermaid
 graph TB
-    subgraph "Local Workstation / CI Runner"
-        TF[Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers]
-        DIAG[non-interactive-diag.sh<br/>• Exit Code & Stderr Triage<br/>• Zero-Exec Guardrails]
+    %% Styling and Class Definitions
+    classDef client fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef control fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef aws fill:#451a03,stroke:#fbbf24,stroke-width:2px,color:#fef3c7;
+    classDef tke fill:#14532d,stroke:#34d399,stroke-width:2px,color:#ecfdf5;
+    classDef obs fill:#701a75,stroke:#f472b6,stroke-width:2px,color:#fdf2f8;
+    classDef secret fill:#022c22,stroke:#10b981,stroke-width:2px,color:#d1fae5;
+
+    subgraph WORKSTATION["💻 Local Workstation / CI Runner"]
+        TF["🏗️ Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers"]:::client
+        DIAG["🩺 SRE Diagnostic Script<br/>• non-interactive-diag.sh<br/>• Exit Code & Stderr Triage"]:::client
     end
 
-    subgraph "Local Kind Control Plane (1.28+)"
-        API[Kubernetes API Server<br/>NodePort 30080 / 30000]
-        ARGO[Argo CD Control Plane<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing]
-        ESO[External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Binding]
-        MOCK_STORE[(Simulated Cloud Vault<br/>AWS SSM / Vault Provider)]
+    subgraph CONTROL_PLANE["☸️ Local Kind Control Plane (v1.28+)"]
+        API["🚪 Kubernetes API Server<br/>NodePort 30080 / 30000"]:::control
+        ARGO["🐙 Argo CD GitOps<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing"]:::control
+        ESO["🔐 External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Reconciliation"]:::secret
+        MOCK_STORE[("☁️ Simulated Cloud Vault<br/>AWS SSM / Vault Secret Provider")]:::secret
     end
 
-    subgraph "Workload Data Plane (Simulated Multi-Cloud)"
-        subgraph "Worker 1: AWS Simulation Node"
-            MC_AWS[CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection]
-            SECRET_AWS[(K8s Secret: in-memory<br/>mock-db-credentials)]
+    subgraph DATA_PLANE["⚡ Workload Data Plane (Simulated Multi-Cloud)"]
+        subgraph NODE_AWS["🟠 Worker 1: AWS Simulation Node"]
+            MC_AWS["🐝 CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection"]:::aws
+            SECRET_AWS[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
         end
 
-        subgraph "Worker 2: TKE Simulation Node"
-            MC_TKE[CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Capabilities]
-            SECRET_TKE[(K8s Secret: in-memory<br/>mock-db-credentials)]
+        subgraph NODE_TKE["🟢 Worker 2: TKE Simulation Node"]
+            MC_TKE["🐝 CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Linux Caps"]:::tke
+            SECRET_TKE[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
         end
     end
 
-    subgraph "Enterprise SRE Observability"
-        PROM[Prometheus Engine<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection]
-        GRAF[Grafana Golden Signals<br/>• Latency, Traffic, Errors, Saturation]
+    subgraph OBSERVABILITY["📊 Enterprise SRE Observability Stack"]
+        PROM["🔥 Prometheus Core<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection"]:::obs
+        GRAF["📈 Grafana Dashboards<br/>• Golden Signals (Latency, Traffic, Errors, Saturation)"]:::obs
     end
 
-    TF -->|Declarative Up| API
-    ARGO -->|Sync App-of-Apps| MC_AWS
-    ARGO -->|Sync App-of-Apps| MC_TKE
-    ESO <-->|In-Memory Fetch| MOCK_STORE
-    ESO -->|Generate Secret| SECRET_AWS
-    ESO -->|Generate Secret| SECRET_TKE
-    SECRET_AWS -.->|Inject Env| MC_AWS
-    SECRET_TKE -.->|Inject Env| MC_TKE
+    %% Workflows & Data Flows
+    TF ==>|1. Declarative Bootstrap| API
+    ARGO -->|2. GitOps Continuous Delivery| MC_AWS
+    ARGO -->|2. GitOps Continuous Delivery| MC_TKE
+    ESO <-->|3. Zero-Trust Fetch| MOCK_STORE
+    ESO -.->|4. Inject Ephemeral Secret| SECRET_AWS
+    ESO -.->|4. Inject Ephemeral Secret| SECRET_TKE
+    SECRET_AWS -->|5. Mount Vault Env| MC_AWS
+    SECRET_TKE -->|5. Mount Vault Env| MC_TKE
 
-    PROM -.->|Scrape Metrics| MC_AWS
-    PROM -.->|Scrape Metrics| MC_TKE
-    GRAF -->|Visualize| PROM
-    DIAG -.->|Non-Interactive Stderr Extractor| MC_AWS
-    DIAG -.->|Non-Interactive Stderr Extractor| MC_TKE
+    PROM -.->|6. Scrape 15s Cadence| MC_AWS
+    PROM -.->|6. Scrape 15s Cadence| MC_TKE
+    GRAF -->|7. PromQL Metrics Queries| PROM
+    DIAG -.->|8. Automated Non-Interactive Triage| MC_AWS
+    DIAG -.->|8. Automated Non-Interactive Triage| MC_TKE
 ```

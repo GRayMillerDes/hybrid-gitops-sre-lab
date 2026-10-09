@@ -17,7 +17,63 @@ A production-mirror local sandbox demonstrating modern platform engineering prac
 
 The lab simulates a hybrid multi-cluster environment with an emphasis on **Zero-ClickOps compliance** and **Zero-Trust credential delivery**:
 
-![Architecture Topology](./architecture/topology-diagram.png)
+![Architecture Topology](./architecture/topology-diagram.svg)
+
+```mermaid
+graph TB
+    %% Styling and Class Definitions
+    classDef client fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#f8fafc;
+    classDef control fill:#1e1b4b,stroke:#818cf8,stroke-width:2px,color:#f8fafc;
+    classDef aws fill:#451a03,stroke:#fbbf24,stroke-width:2px,color:#fef3c7;
+    classDef tke fill:#14532d,stroke:#34d399,stroke-width:2px,color:#ecfdf5;
+    classDef obs fill:#701a75,stroke:#f472b6,stroke-width:2px,color:#fdf2f8;
+    classDef secret fill:#022c22,stroke:#10b981,stroke-width:2px,color:#d1fae5;
+
+    subgraph WORKSTATION["💻 Local Workstation / CI Runner"]
+        TF["🏗️ Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers"]:::client
+        DIAG["🩺 SRE Diagnostic Script<br/>• non-interactive-diag.sh<br/>• Exit Code & Stderr Triage"]:::client
+    end
+
+    subgraph CONTROL_PLANE["☸️ Local Kind Control Plane (v1.28+)"]
+        API["🚪 Kubernetes API Server<br/>NodePort 30080 / 30000"]:::control
+        ARGO["🐙 Argo CD GitOps<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing"]:::control
+        ESO["🔐 External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Reconciliation"]:::secret
+        MOCK_STORE[("☁️ Simulated Cloud Vault<br/>AWS SSM / Vault Secret Provider")]:::secret
+    end
+
+    subgraph DATA_PLANE["⚡ Workload Data Plane (Simulated Multi-Cloud)"]
+        subgraph NODE_AWS["🟠 Worker 1: AWS Simulation Node"]
+            MC_AWS["🐝 CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection"]:::aws
+            SECRET_AWS[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
+        end
+
+        subgraph NODE_TKE["🟢 Worker 2: TKE Simulation Node"]
+            MC_TKE["🐝 CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Linux Caps"]:::tke
+            SECRET_TKE[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
+        end
+    end
+
+    subgraph OBSERVABILITY["📊 Enterprise SRE Observability Stack"]
+        PROM["🔥 Prometheus Core<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection"]:::obs
+        GRAF["📈 Grafana Dashboards<br/>• Golden Signals (Latency, Traffic, Errors, Saturation)"]:::obs
+    end
+
+    %% Workflows & Data Flows
+    TF ==>|1. Declarative Bootstrap| API
+    ARGO -->|2. GitOps Continuous Delivery| MC_AWS
+    ARGO -->|2. GitOps Continuous Delivery| MC_TKE
+    ESO <-->|3. Zero-Trust Fetch| MOCK_STORE
+    ESO -.->|4. Inject Ephemeral Secret| SECRET_AWS
+    ESO -.->|4. Inject Ephemeral Secret| SECRET_TKE
+    SECRET_AWS -->|5. Mount Vault Env| MC_AWS
+    SECRET_TKE -->|5. Mount Vault Env| MC_TKE
+
+    PROM -.->|6. Scrape 15s Cadence| MC_AWS
+    PROM -.->|6. Scrape 15s Cadence| MC_TKE
+    GRAF -->|7. PromQL Metrics Queries| PROM
+    DIAG -.->|8. Automated Non-Interactive Triage| MC_AWS
+    DIAG -.->|8. Automated Non-Interactive Triage| MC_TKE
+```
 
 1. **Declarative Control Plane**: Automated local Kind multi-node cluster deployment via Terraform.
 2. **Zero-Trust Secret Governance**: Implements [External Secrets Operator (ESO)](https://external-secrets.io/) fetching mock parameters from cloud secret stores, completely eliminating credentials from Terraform state and Git repositories.
