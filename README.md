@@ -7,23 +7,55 @@
 [![Observability](https://img.shields.io/badge/SRE-Prometheus%20%7C%20Grafana-red?logo=prometheus&logoColor=white)](https://prometheus.io/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-> **Companion Architecture Blueprint**: See the companion in-depth technical retrospective and whitepaper at [multicloud-cicd-zero-trust-architecture](https://github.com/GRayMillerDes/multicloud-cicd-zero-trust-architecture).
+> **Companion Architecture Blueprint**: See the full architectural specification and multi-cloud retrospective at [multicloud-cicd-zero-trust-architecture](https://github.com/GRayMillerDes/multicloud-cicd-zero-trust-architecture).
 
-A production-mirror local sandbox demonstrating modern platform engineering practices in regulated environments. This repository implements declarative infrastructure provisioning, secretless workload identities, automated drift detection, and non-interactive SRE diagnostic workflows.
+A production-mirror local sandbox demonstrating modern platform engineering practices in regulated environments. Implements declarative multi-node Kubernetes orchestration, secretless workload identities, automated drift detection, and non-interactive SRE triage.
 
 ---
 
-## 🎯 How to Use This Lab (3-Minute Experience Guide)
+## ⚡ Quickstart
 
-This repository is designed to be **100% runnable locally on macOS or Linux with zero cloud costs**. If someone visits this repo, here is how to explore it:
+### Prerequisites
+- [Docker Engine](https://docs.docker.com/engine/) 24.0+
+- [Kind](https://kind.sigs.k8s.io/) & [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Terraform](https://www.terraform.io/) 1.6+
+- [Helm](https://helm.sh/) 3.12+
 
-| Goal / User Path | What To Do | Expected Result |
-| :--- | :--- | :--- |
-| **🚀 Run Full Local Cluster** | Run `chmod +x ./scripts/setup-local-env.sh && ./scripts/setup-local-env.sh` | Spins up a 3-node Kind cluster, installs ESO, Argo CD, Prometheus & Grafana in ~2 minutes. |
-| **📊 View Live Observability** | Open `http://localhost:30000` (User: `admin` / Password: `admin`) | Live Grafana Golden Signals dashboard tracking latency, error rates, and saturation. |
-| **🐙 Inspect GitOps Delivery** | Open `http://localhost:30080` | Argo CD UI showing App-of-Apps continuous sync across simulated multi-cloud nodes. |
-| **🩺 Test Non-Interactive SRE Triage** | Run `./scripts/non-interactive-diag.sh` | Simulates troubleshooting CrashLoopBackOff pods under zero-kubectl-exec least-privilege security. |
-| **🧹 Complete Clean Up** | Run `cd terraform && terraform destroy -auto-approve` | Zero footprint left on your machine. |
+### 1. Bootstrap Cluster & Platform (1 Command)
+```bash
+./scripts/setup-local-env.sh
+```
+*Or manually via Terraform:*
+```bash
+cd terraform
+cp terraform.tfvars.example terraform.tfvars
+terraform init && terraform apply -auto-approve
+```
+
+### 2. Access Local Endpoints
+| Component | Local Endpoint | Credentials | Description |
+| :--- | :--- | :--- | :--- |
+| **Argo CD UI** | [http://localhost:30080](http://localhost:30080) | Insecure Sandbox Mode | Continuous GitOps delivery & drift auto-sync |
+| **Grafana** | [http://localhost:30000](http://localhost:30000) | `admin` / `prom-operator` | SRE Golden Signals (Latency, Traffic, Errors, Saturation) |
+
+### 3. Verify Zero-Trust Secret Synchronization
+Validate that credentials never touch Git or `terraform.tfstate`, reconciling dynamically via External Secrets Operator (ESO):
+```bash
+kubectl get clustersecretstore
+kubectl get externalsecrets -A
+kubectl get secret mock-db-credentials -n default -o yaml
+```
+
+### 4. Run Non-Interactive SRE Diagnostic Probe
+Simulate rapid RCA under zero-kubectl-exec compliance policies:
+```bash
+./scripts/non-interactive-diag.sh --namespace default --pod-label app=broken-worker
+```
+
+### 5. Tear Down
+```bash
+cd terraform && terraform destroy -auto-approve
+```
 
 ---
 
@@ -104,6 +136,7 @@ hybrid-gitops-sre-lab/
 ├── README.md                      # Comprehensive Architecture & Operations Runbook
 ├── architecture/
 │   ├── ARCHITECTURE.md            # Control Plane vs Data Plane Technical Blueprint
+│   ├── topology-diagram.svg       # Vector Architectural Topology (Infinite DPI)
 │   ├── topology-diagram.png       # High-Resolution Architectural Topology
 │   └── topology-diagram.mermaid   # Mermaid Source Graph
 ├── terraform/                     # Multi-Node Sandbox Infrastructure as Code
@@ -130,81 +163,6 @@ hybrid-gitops-sre-lab/
 └── scripts/
     ├── setup-local-env.sh         # One-Command Local Environment Bootstrap
     └── non-interactive-diag.sh    # Non-Interactive Container Exit Code & Stderr Triage Tool
-```
-
----
-
-## 🚀 Quickstart
-
-### Prerequisites
-- [Docker Engine](https://docs.docker.com/engine/) 24.0+
-- [Kind](https://kind.sigs.k8s.io/) & [kubectl](https://kubernetes.io/docs/tasks/tools/)
-- [Terraform](https://www.terraform.io/) 1.6+
-- [Helm](https://helm.sh/) 3.12+
-
-### 1. Provision Infrastructure & Platform
-
-Option A: Automated bootstrap via script:
-```bash
-./scripts/setup-local-env.sh
-```
-
-Option B: Manual Terraform execution:
-```bash
-cd terraform
-cp terraform.tfvars.example terraform.tfvars
-terraform init
-terraform apply -auto-approve
-```
-
-Access local endpoints once applied:
-- **Argo CD UI**: [http://localhost:30080](http://localhost:30080)
-- **Grafana Golden Signals**: [http://localhost:30000](http://localhost:30000) (User: `admin`, Password: `prom-operator`)
-
----
-
-### 2. Verify Zero-Trust Secret Synchronization
-
-Verify that no plaintext secrets exist in Terraform state while credentials are synthesized dynamically in-memory by ESO:
-
-```bash
-# Verify ClusterSecretStore status
-kubectl get clustersecretstore
-
-# Verify ExternalSecret reconciliation
-kubectl get externalsecrets -A
-
-# Inspect in-memory generated Kubernetes secret
-kubectl get secret mock-db-credentials -n default -o yaml
-```
-
----
-
-### 3. Run Non-Interactive Diagnostic Probe
-
-Simulate a failed deployment under least-privilege restrictions (without granting `kubectl exec` permissions to operators):
-
-```bash
-# Run automated triage targeting failed or restarting pods
-./scripts/non-interactive-diag.sh --namespace default --pod-label app=broken-worker
-```
-
-The script inspects `.status.containerStatuses`, pinpoints the container's `terminated.exitCode`, and pulls the `--previous` stderr log buffer to diagnose root cause instantly:
-```text
-==============================================================================
- [SRE Proactive RCA] Non-Interactive Diagnostic Probe
- Target Namespace : default
- Target Selector  : app=broken-worker
-==============================================================================
-[*] Inspecting Pod: broken-worker-7c98b64f4f-2xjlw
-    Phase: Running | Cumulative Restarts: 4
-    [*] Container: worker
-        State/Waiting Reason : CrashLoopBackOff
-        Last Exit Code       : 137 (OOMKilled) / 1 (Application Error)
-        Extracting previous log buffer...
-        [+] Previous logs extracted -> /tmp/sre-diagnostics-xxx/broken-worker_worker_previous.log
-==============================================================================
-[+] Diagnostic scan complete without requiring interactive shell access.
 ```
 
 ---
