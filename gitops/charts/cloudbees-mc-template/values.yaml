@@ -3,9 +3,12 @@ controller:
   environment: local-sandbox
   replicas: 1
 
+# Controller Image Configuration
+# Process: Golden image baked by pipeline (.github/workflows/build-controller-image.yaml)
+# Manual Promotion: Update 'tag' below, submit PR for review to trigger GitOps deployment
 image:
   repository: cloudbees/cloudbees-core-cm
-  tag: "2.440.3.1"
+  tag: "2.440.3.1-p1" # Upstream base + Security patch increment
   pullPolicy: IfNotPresent
 
 service:

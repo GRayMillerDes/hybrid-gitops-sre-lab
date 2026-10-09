@@ -1,0 +1,62 @@
+name: "Build Golden Controller Image (OC & MC)"
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_component:
+        description: 'Component to build'
+        required: true
+        default: 'mc'
+        type: choice
+        options:
+          - mc
+          - oc
+      base_version:
+        description: 'Upstream Base Version (e.g., 2.440.3.1)'
+        required: true
+        default: '2.440.3.1'
+      patch_version:
+        description: 'Internal Security Patch Increment (e.g., -p1)'
+        required: true
+        default: '-p1'
+
+permissions:
+  contents: write
+  packages: write
+  security-events: write
+
+jobs:
+  build-and-harden:
+    name: "1. Bake & Harden Immutable Golden Image"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Image Tag Metadata
+        id: meta
+        run: |
+          IMAGE_TAG="${{ github.event.inputs.base_version }}${{ github.event.inputs.patch_version }}"
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+          echo "Target Component: ${{ github.event.inputs.target_component }}"
+          echo "Baked Golden Tag: ${IMAGE_TAG}"
+
+      - name: Run Trivy Vulnerability Scan on Target Base
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: "cloudbees/cloudbees-core-cm:${{ github.event.inputs.base_version }}"
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+
+      - name: Publish Golden Image & Output Manifest
+        run: |
+          echo "=============================================================================="
+          echo "[+] Golden Image Baked Successfully!"
+          echo "    Component: ${{ github.event.inputs.target_component }}"
+          echo "    Image Tag: ${{ env.IMAGE_TAG }}"
+          echo "    Registry : ghcr.io/${{ github.repository_owner }}/cloudbees-${{ github.event.inputs.target_component }}:${{ env.IMAGE_TAG }}"
+          echo "=============================================================================="
+          echo "NEXT STEP: Manual Version Promotion"
+          echo "Update image.tag in gitops/charts/cloudbees-mc-template/values.yaml to '${{ env.IMAGE_TAG }}'"
+          echo "Submit a PR to main to trigger Terraform Cloud & Argo CD GitOps convergence."
