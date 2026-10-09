@@ -1,5 +1,6 @@
 # Enterprise Hybrid GitOps & Zero-Trust SRE Sandbox
 
+[![CI/CD](https://github.com/GRayMillerDes/hybrid-gitops-sre-lab/actions/workflows/terraform-cloud-gitops.yaml/badge.svg)](https://github.com/GRayMillerDes/hybrid-gitops-sre-lab/actions/workflows/terraform-cloud-gitops.yaml)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-1.28%2B-blue?logo=kubernetes&logoColor=white)](https://kubernetes.io/)
 [![Terraform](https://img.shields.io/badge/Terraform-1.6%2B-purple?logo=terraform&logoColor=white)](https://www.terraform.io/)
 [![GitOps](https://img.shields.io/badge/GitOps-Argo%20CD-orange?logo=argo&logoColor=white)](https://argoproj.github.io/cd/)
@@ -13,7 +14,7 @@ A production-mirror local sandbox demonstrating modern platform engineering prac
 
 ---
 
-## ⚡ Quickstart
+## Quickstart
 
 ### Prerequisites
 - [Docker Engine](https://docs.docker.com/engine/) 24.0+
@@ -59,7 +60,7 @@ cd terraform && terraform destroy -auto-approve
 
 ---
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 The lab simulates a hybrid multi-cluster environment with an emphasis on **Zero-ClickOps compliance** and **Zero-Trust credential delivery**:
 
@@ -75,33 +76,33 @@ graph TB
     classDef obs fill:#701a75,stroke:#f472b6,stroke-width:2px,color:#fdf2f8;
     classDef secret fill:#022c22,stroke:#10b981,stroke-width:2px,color:#d1fae5;
 
-    subgraph WORKSTATION["💻 Local Workstation / CI Runner"]
-        TF["🏗️ Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers"]:::client
-        DIAG["🩺 SRE Diagnostic Script<br/>• non-interactive-diag.sh<br/>• Exit Code & Stderr Triage"]:::client
+    subgraph WORKSTATION["Local Workstation / CI Runner"]
+        TF["Terraform 1.6+<br/>• Kind Multi-Node Engine<br/>• Zero-Secret State Providers"]:::client
+        DIAG["SRE Diagnostic Script<br/>• non-interactive-diag.sh<br/>• Exit Code & Stderr Triage"]:::client
     end
 
-    subgraph CONTROL_PLANE["☸️ Local Kind Control Plane (v1.28+)"]
-        API["🚪 Kubernetes API Server<br/>NodePort 30080 / 30000"]:::control
-        ARGO["🐙 Argo CD GitOps<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing"]:::control
-        ESO["🔐 External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Reconciliation"]:::secret
-        MOCK_STORE[("☁️ Simulated Cloud Vault<br/>AWS SSM / Vault Secret Provider")]:::secret
+    subgraph CONTROL_PLANE["Local Kind Control Plane (v1.28+)"]
+        API["Kubernetes API Server<br/>NodePort 30080 / 30000"]:::control
+        ARGO["Argo CD GitOps<br/>• App-of-Apps Pattern<br/>• Automated Drift Self-Healing"]:::control
+        ESO["External Secrets Operator<br/>• ClusterSecretStore CRD<br/>• ExternalSecret Reconciliation"]:::secret
+        MOCK_STORE[("Simulated Cloud Vault<br/>AWS SSM / Vault Secret Provider")]:::secret
     end
 
-    subgraph DATA_PLANE["⚡ Workload Data Plane (Simulated Multi-Cloud)"]
-        subgraph NODE_AWS["🟠 Worker 1: AWS Simulation Node"]
-            MC_AWS["🐝 CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection"]:::aws
-            SECRET_AWS[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
+    subgraph DATA_PLANE["Workload Data Plane (Simulated Multi-Cloud)"]
+        subgraph NODE_AWS["Worker 1: AWS Simulation Node"]
+            MC_AWS["CloudBees MC - AWS Apps<br/>• runAsUser: 1000<br/>• Read-only Root FS<br/>• Dynamic CasC Injection"]:::aws
+            SECRET_AWS[("K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
         end
 
-        subgraph NODE_TKE["🟢 Worker 2: TKE Simulation Node"]
-            MC_TKE["🐝 CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Linux Caps"]:::tke
-            SECRET_TKE[("🔑 K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
+        subgraph NODE_TKE["Worker 2: TKE Simulation Node"]
+            MC_TKE["CloudBees MC - TKE Platform<br/>• CIS Benchmark Hardened<br/>• Drop ALL Linux Caps"]:::tke
+            SECRET_TKE[("K8s Secret (In-Memory)<br/>mock-db-credentials")]:::secret
         end
     end
 
-    subgraph OBSERVABILITY["📊 Enterprise SRE Observability Stack"]
-        PROM["🔥 Prometheus Core<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection"]:::obs
-        GRAF["📈 Grafana Dashboards<br/>• Golden Signals (Latency, Traffic, Errors, Saturation)"]:::obs
+    subgraph OBSERVABILITY["Enterprise SRE Observability Stack"]
+        PROM["Prometheus Core<br/>• SLO Burn Rate Multi-Window<br/>• CrashLoopBackOff Detection"]:::obs
+        GRAF["Grafana Dashboards<br/>• Golden Signals (Latency, Traffic, Errors, Saturation)"]:::obs
     end
 
     %% Workflows & Data Flows
@@ -129,7 +130,7 @@ graph TB
 
 ---
 
-## 📂 Repository Clean Architecture
+## Repository Clean Architecture
 
 ```text
 hybrid-gitops-sre-lab/
@@ -144,6 +145,7 @@ hybrid-gitops-sre-lab/
 │   │   ├── kind-cluster/          # Local Kind Cluster (1 Control-Plane + 2 Workers)
 │   │   ├── eso-secret-store/      # External Secrets Operator Mock Cloud Store
 │   │   └── observability-stack/   # Automated Prometheus & Grafana Injection
+│   ├── backend.tf                 # Terraform Cloud Remote Backend Configuration
 │   ├── main.tf                    # Root Module Orchestration
 │   ├── variables.tf
 │   ├── outputs.tf
@@ -167,16 +169,27 @@ hybrid-gitops-sre-lab/
 
 ---
 
-## 🛡️ Key SRE & Security Features
+## Key SRE & Security Features
 
-- 🔒 **Zero-Secret Terraform State**: All sensitive values are decoupled from IaC and injected dynamically via ESO CRDs at runtime.
-- 🛡️ **Hardened Security Contexts**: Enforces CIS Kubernetes benchmarks (`allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, drop `ALL` capabilities, non-root user `1000`).
-- ⚡ **Automated Drift Self-Healing**: Argo CD reconciles cluster state automatically, preventing configuration drift caused by manual web console operations.
-- 📊 **SRE Golden Signals Telemetry**: Continuous monitoring of Latency, Traffic, Errors, and Saturation, paired with multi-window SLO burn rate alerts based on Google SRE standards.
-- 🔍 **Automated Failure Triage**: Eliminates troubleshooting dead-ends in production namespaces where engineers are prohibited from interactive shell execution.
+- **Zero-Secret Terraform State**: All sensitive values are decoupled from IaC and injected dynamically via ESO CRDs at runtime.
+- **Hardened Security Contexts**: Enforces CIS Kubernetes benchmarks (`allowPrivilegeEscalation: false`, `readOnlyRootFilesystem: true`, drop `ALL` capabilities, non-root user `1000`).
+- **Automated Drift Self-Healing**: Argo CD reconciles cluster state automatically, preventing configuration drift caused by manual web console operations.
+- **SRE Golden Signals Telemetry**: Continuous monitoring of Latency, Traffic, Errors, and Saturation, paired with multi-window SLO burn rate alerts based on Google SRE standards.
+- **Automated Failure Triage**: Eliminates troubleshooting dead-ends in production namespaces where engineers are prohibited from interactive shell execution.
 
 ---
 
-## 📄 License
+## SRE Runbooks & Disaster Recovery Scenarios
+
+| Failure Scenario | Automated Detection | Non-Interactive Triage Runbook | Resolution Mechanism |
+| :--- | :--- | :--- | :--- |
+| **CrashLoopBackOff Pod** | Prometheus Alert: `PodCrashLooping` | `./scripts/non-interactive-diag.sh -n default -l app=broken-worker` | Automated extraction of previous container stderr and exit code |
+| **SLO Error Budget Burn** | Prometheus Alert: `MultiWindowBurnRate` | PromQL evaluation in Grafana Golden Signals dashboard | Auto-scale worker pool or throttle non-essential traffic |
+| **Secret Sync Failure** | ESO CRD Condition: `Ready=False` | `kubectl get externalsecrets -A -o jsonpath='{.items[*].status.conditions}'` | Refresh mock vault token or reconcile ClusterSecretStore |
+| **Configuration Drift** | Argo CD Status: `OutOfSync` | Webhook triggered reconciliation | Argo CD automated self-heal forces cluster back to Git target state |
+
+---
+
+## License
 
 Distributed under the Apache-2.0 License. See [LICENSE](./LICENSE) for more details.
