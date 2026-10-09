@@ -13,6 +13,20 @@ A production-mirror local sandbox demonstrating modern platform engineering prac
 
 ---
 
+## 🎯 How to Use This Lab (3-Minute Experience Guide)
+
+This repository is designed to be **100% runnable locally on macOS or Linux with zero cloud costs**. If someone visits this repo, here is how to explore it:
+
+| Goal / User Path | What To Do | Expected Result |
+| :--- | :--- | :--- |
+| **🚀 Run Full Local Cluster** | Run `chmod +x ./scripts/setup-local-env.sh && ./scripts/setup-local-env.sh` | Spins up a 3-node Kind cluster, installs ESO, Argo CD, Prometheus & Grafana in ~2 minutes. |
+| **📊 View Live Observability** | Open `http://localhost:30000` (User: `admin` / Password: `admin`) | Live Grafana Golden Signals dashboard tracking latency, error rates, and saturation. |
+| **🐙 Inspect GitOps Delivery** | Open `http://localhost:30080` | Argo CD UI showing App-of-Apps continuous sync across simulated multi-cloud nodes. |
+| **🩺 Test Non-Interactive SRE Triage** | Run `./scripts/non-interactive-diag.sh` | Simulates troubleshooting CrashLoopBackOff pods under zero-kubectl-exec least-privilege security. |
+| **🧹 Complete Clean Up** | Run `cd terraform && terraform destroy -auto-approve` | Zero footprint left on your machine. |
+
+---
+
 ## 🏗️ Architecture Overview
 
 The lab simulates a hybrid multi-cluster environment with an emphasis on **Zero-ClickOps compliance** and **Zero-Trust credential delivery**:
