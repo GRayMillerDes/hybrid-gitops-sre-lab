@@ -9,8 +9,8 @@ terraform {
 }
 
 resource "kind_cluster" "default" {
-  name            = var.cluster_name
-  node_image      = "kindest/node:${var.kubernetes_version}"
-  wait_for_ready  = true
-  kind_config     = file("${path.module}/kind-config.yaml")
+  name           = var.cluster_name
+  node_image     = "kindest/node:${var.kubernetes_version}"
+  wait_for_ready = true
+  kind_config    = file("${path.module}/kind-config.yaml")
 }
